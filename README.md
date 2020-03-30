@@ -3,13 +3,13 @@
  Nicknames are available as a Moda Placeholder (`{NICKNAME}`) for use in other modules.
 
 ## Commands
- | command                           | description                                                                                                                               | aliases                          | permission                        |
- | :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :-------------------------------- |
- | `/nickname`                       | opens a gui to set a nickname.                                                                                                            | `/nick`                          | `moda.module.nickname.set`        |
- | `/nickname <nickname>`            | sets your own nickname to `<nickname>`.                                                                                                   | `/nick <nickname>`               | `moda.module.nickname.set`        |
- | `/nickname <player>`              | opens a GUI to set `<player>`'s nickname.                                                                                                 | `/nick <player>`                 | `moda.module.nickname.set.others` |
- | `/nickname <player> <nickname>`   | sets `<player>`'s nickname to `<nickname>`.                                                                                               | `/nick <player> <nickname>`      | `moda.module.nickname.set.others` |
- | `/whois <username|nickname> [id]` | finds the player(s) that are using `<username>` or `<nickname>`, <br> use `[id]` to specify which player if more than 1 player is listed. | `/find <username|nickname> [id]` | `moda.module.nickname.find`       |
+ | command                           | description                                                                                                                                                       | aliases                          | permission                        |
+ | :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :-------------------------------- |
+ | `/nickname`                       | opens a gui to set a nickname.                                                                                                                                    | `/nick`                          | `moda.module.nickname.set`        |
+ | `/nickname <nickname>`            | sets your own nickname to `<nickname>`.                                                                                                                           | `/nick <nickname>`               | `moda.module.nickname.set`        |
+ | `/nickname <player>`              | opens a GUI to set `<player>`'s nickname.                                                                                                                         | `/nick <player>`                 | `moda.module.nickname.set.others` |
+ | `/nickname <player> <nickname>`   | sets `<player>`'s nickname to `<nickname>`.                                                                                                                       | `/nick <player> <nickname>`      | `moda.module.nickname.set.others` |
+ | `/whois <username|nickname> [id]` | finds and displays info about the player(s) that are using `<username>` or `<nickname>`, <br> use `[id]` to specify which player if more than 1 player is listed. | `/find <username|nickname> [id]` | `moda.module.nickname.find`       |
 
 ## Permissions
  | permission                          | description                                                             |
