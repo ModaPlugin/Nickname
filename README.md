@@ -24,7 +24,5 @@
 ---
 ## Recommended Modules
 - **[ChatFormat](https://github.com/ModaPlugin/ChatFormat "lets admins make the chat look fancy!")**
-- **ChatColor (coming soon)**
-  - lets players use colors and formatting to spice up their chat.
-- **PlayerInfo (coming soon)**
-  - stores and is able to display information about a player's whereabouts, login date etc.
+- **[ChatColor](https://github.com/orgs/ModaPlugin/projects/2#card-35374379 "lets players use colors and formatting to spice up their chat.")** (coming soon)
+- **[PlayerInfo](https://github.com/orgs/ModaPlugin/projects/2#card-35437336 "stores and is able to display information about a player's whereabouts, login date etc.")** (coming soon)
