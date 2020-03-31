@@ -21,8 +21,6 @@
  | `moda.module.nickname.set.format`   | Allows a player to use formatting in their nickname.                    |
  | `moda.module.nickname.set.others`   | Allows a player to set another player's nickname.                       |
  | `moda.module.nickname.set.taken`    | Allows a player to set a nickname that's already set by another player. |
- | `moda.module.nickname.reset`        | Allows a player to reset/remove their nickname.                         |
- | `moda.module.nickname.reset.others` | Allows a player to reset/remove another player's nickname.              |
 
 ---
 
