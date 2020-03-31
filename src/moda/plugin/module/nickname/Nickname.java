@@ -4,9 +4,11 @@ import moda.plugin.moda.modules.Module;
 import moda.plugin.moda.utils.placeholders.ModaPlaceholderAPI;
 import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
 import moda.plugin.moda.utils.storage.FileStorageHandler;
+import moda.plugin.module.nickname.commands.NicknameCommand;
 import moda.plugin.module.nickname.storage.NicknameDatabaseStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameFileStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public class Nickname extends Module<NicknameStorageHandler> {
 
@@ -18,6 +20,8 @@ public class Nickname extends Module<NicknameStorageHandler> {
     - nickname command
     - nickname GUI
      */
+
+    public static final int NICKNAME_MAX_LENGTH = 128;
 
     public String getName() {
         return null;
@@ -34,9 +38,13 @@ public class Nickname extends Module<NicknameStorageHandler> {
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable() throws InvalidConfigurationException {
+        if (getConfig().getInt("nickname.max-length", NICKNAME_MAX_LENGTH) > 128) {
+            throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
+        }
         ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> this.getStorage().getNickname(player));
         getLogger().info("Nickname module enabled.");
+        registerCommand(new NicknameCommand());
     }
 
     @Override
