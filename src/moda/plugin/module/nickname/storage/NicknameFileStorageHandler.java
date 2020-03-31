@@ -4,9 +4,11 @@ import moda.plugin.moda.modules.Module;
 import moda.plugin.moda.utils.BukkitFuture;
 import moda.plugin.moda.utils.storage.FileStorageHandler;
 import moda.plugin.moda.utils.storage.ModuleStorageHandler;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public class NicknameFileStorageHandler extends FileStorageHandler implements NicknameStorageHandler {
     public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) {
@@ -17,15 +19,15 @@ public class NicknameFileStorageHandler extends FileStorageHandler implements Ni
         return null;
     }
 
-    public BukkitFuture<String> getNickname(Player player) {
+    public BukkitFuture<Optional<String>> getNickname(Player player) {
         return null;
     }
 
-    public BukkitFuture<Void> setNickname(Player player, String nickname) {
+    public BukkitFuture<Boolean> setNickname(Player player, String nickname) {
         return null;
     }
 
-    public BukkitFuture<Collection<Player>> getPlayersByNickname(String nickname) {
+    public BukkitFuture<Collection<OfflinePlayer>> getPlayersByNickname(String nickname) {
         return null;
     }
 }
