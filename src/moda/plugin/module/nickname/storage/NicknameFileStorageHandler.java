@@ -26,7 +26,7 @@ public class NicknameFileStorageHandler extends JsonStorageHandler implements Ni
     }
 
     public BukkitFuture<Boolean> hasNickname(Player player) {
-        oireturn null;
+        return null;
     }
 
     public BukkitFuture<Optional<String>> getNickname(Player player) {
