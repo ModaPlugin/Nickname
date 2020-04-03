@@ -4,15 +4,24 @@ import moda.plugin.moda.modules.Module;
 import moda.plugin.moda.utils.BukkitFuture;
 import moda.plugin.moda.utils.storage.FileStorageHandler;
 import moda.plugin.moda.utils.storage.ModuleStorageHandler;
+import moda.plugin.moda.utils.storage.YamlStorageHandler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
-public class NicknameFileStorageHandler extends FileStorageHandler implements NicknameStorageHandler {
-    public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) {
+public class NicknameFileStorageHandler extends YamlStorageHandler implements NicknameStorageHandler {
+
+    public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) throws IOException {
         super(module);
+    }
+
+    @Override
+    public void save() {
+
     }
 
     public BukkitFuture<Boolean> hasNickname(Player player) {
@@ -27,7 +36,13 @@ public class NicknameFileStorageHandler extends FileStorageHandler implements Ni
         return null;
     }
 
-    public BukkitFuture<Collection<OfflinePlayer>> getPlayersByNickname(String nickname) {
+    @Override
+    public BukkitFuture<Boolean> nicknameExists(String nickname) {
+        return null;
+    }
+
+    @Override
+    public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
         return null;
     }
 }

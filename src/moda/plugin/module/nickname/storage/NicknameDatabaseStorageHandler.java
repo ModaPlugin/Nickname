@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler implements NicknameStorageHandler {
+
     public NicknameDatabaseStorageHandler(Module<?> module) {
         super(module);
     }
