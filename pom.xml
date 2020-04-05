@@ -9,7 +9,7 @@
     <artifactId>nickname</artifactId>
 
     <name>Nickname</name>
-    <version>1.0</version>
+    <version>canary</version>
 
     <build>
         <finalName>${project.name}</finalName>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>moda.plugin</groupId>
             <artifactId>moda</artifactId>
-            <version>alpha</version>
+            <version>canary</version>
         </dependency>
 
         <dependency>
