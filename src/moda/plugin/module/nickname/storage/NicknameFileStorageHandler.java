@@ -6,6 +6,7 @@ import moda.plugin.moda.modules.Module;
 import moda.plugin.moda.utils.BukkitFuture;
 import moda.plugin.moda.utils.storage.JsonStorageHandler;
 import moda.plugin.moda.utils.storage.ModuleStorageHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import xyz.derkades.derkutils.caching.Cache;
@@ -15,6 +16,8 @@ import java.util.*;
 
 public class NicknameFileStorageHandler extends JsonStorageHandler implements NicknameStorageHandler {
 
+    private static final String PROPERTY_NICKNAME = "nickname";
+
     public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) throws IOException {
         super(module);
     }
@@ -22,36 +25,13 @@ public class NicknameFileStorageHandler extends JsonStorageHandler implements Ni
     public BukkitFuture<Optional<String>> getNickname(OfflinePlayer player) {
         return new BukkitFuture<>(() -> {
 
-            String uuid = player.getUniqueId().toString();
             Optional<String> nickname;
+            UUID uuid = player.getUniqueId();
 
-            // get nickname from cache
-            Optional<Optional<String>> cache = Cache.get("nickname." + player.getUniqueId());
+            nickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-            // if nickname doesn't exist in cache
-            if (!cache.isPresent()) {
-
-                // if player exists in json
-                if (getJson().has(uuid)) {
-                    JsonObject playerData = getJson().get(uuid).getAsJsonObject();
-
-                    // if player has nickname
-                    if (playerData.has("nickname")) {
-                        nickname = Optional.of(playerData.get("nickname").getAsString());
-                        Cache.set("nickname." + player.getUniqueId(), nickname);
-                        return nickname;
-                    }
-                }
-
-                nickname = Optional.empty();
-
-                // add nickname to cache
-                Cache.set("nickname." + player.getUniqueId(), nickname);
-                return nickname;
-            }
-
-            nickname = cache.get();
             return nickname;
+
         });
     }
 
@@ -59,46 +39,69 @@ public class NicknameFileStorageHandler extends JsonStorageHandler implements Ni
     public BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname) {
         return new BukkitFuture<>(() -> {
 
-            String uuid = player.getUniqueId().toString();
+            UUID uuid = player.getUniqueId();
 
             // if nickname = username, remove nickname
             if (nickname.equals(player.getName())) {
-                Cache.remove(uuid + ".nickname");
+                removeProperty(uuid, PROPERTY_NICKNAME);
             }
 
-            // update cache
+            setProperty(uuid, PROPERTY_NICKNAME, nickname);
 
+            return true;
 
-            return false;
         });
     }
 
     @Override
     public BukkitFuture<Boolean> nicknameExists(String nickname) {
-        return null;
+        return new BukkitFuture<>(() -> {
+
+            for (UUID uuid : getUuids()) {
+
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
+
+                if (storedNickname.isPresent() && storedNickname.equals(nickname)) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     @Override
     public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
-
         return new BukkitFuture<>(() -> {
 
-            HashMap<String, String> playerdata = new HashMap<>();
+            Set<OfflinePlayer> players = new HashSet<>();
 
-            JsonObject obj = getJson().getAsJsonObject();
-            Set<Map.Entry<String, JsonElement>> players = obj.entrySet();
+            for (UUID uuid : getUuids()) {
 
-            for (Map.Entry<String, JsonElement> player : players) {
-                playerdata.put(player.toString(), player.getValue().getAsJsonObject().get("nickname").getAsString());
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
+
+                if (storedNickname.isPresent() && storedNickname.equals(nickname)) {
+                    players.add(Bukkit.getOfflinePlayer(uuid));
+                }
             }
-
-            return playerdata;
+            return players;
         });
     }
+
+//    @Override
+//    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
+//
+//        return new BukkitFuture<>(() -> {
+//
+//            HashMap<String, String> playerdata = new HashMap<>();
+//
+//            JsonObject obj = getJson().getAsJsonObject();
+//            Set<Map.Entry<String, JsonElement>> players = obj.entrySet();
+//
+//            for (Map.Entry<String, JsonElement> player : players) {
+//                playerdata.put(player.toString(), player.getValue().getAsJsonObject().get("nickname").getAsString());
+//            }
+//
+//            return playerdata;
+//        });
+//    }
 }
