@@ -1,11 +1,12 @@
 package moda.plugin.module.nickname.storage;
 
-import moda.plugin.moda.modules.Module;
-import moda.plugin.moda.utils.BukkitFuture;
-import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
+import moda.plugin.moda.module.Module;
+import moda.plugin.moda.module.storage.DatabaseStorageHandler;
+import moda.plugin.moda.util.BukkitFuture;
 import moda.plugin.module.nickname.Nickname;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import xyz.derkades.derkutils.bukkit.Colors;
 import xyz.derkades.derkutils.caching.Cache;
 
 import java.sql.PreparedStatement;
@@ -60,16 +61,10 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
         });
     }
 
-    public BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname) {
+    public BukkitFuture<Void> setNickname(OfflinePlayer player, String nickname) {
         return new BukkitFuture<>(() -> {
 
             String uuid = player.getUniqueId().toString();
-
-            // if nickname = username, remove nickname
-            if (nickname.equals(player.getName())) {
-                Cache.remove(getIdentifier(player, DataType.NICKNAME));
-                this.db.prepareStatement("UPDATE module_nickname SET nickname=NULL WHERE uuid=? AND nickname IS NOT NULL", uuid);
-            }
 
             // update cache
             Cache.set("nickname." + uuid, Optional.of(nickname));
@@ -78,7 +73,20 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
             final PreparedStatement statement = this.db.prepareStatement("INSERT INTO module_nickname (uuid, nickname) VALUES (?, ?) ON DUPLICATE KEY UPDATE nickname=?", uuid, nickname, nickname);
             statement.execute();
 
-            return true;
+            return null;
+        });
+    }
+
+    @Override
+    public BukkitFuture<Void> removeNickname(OfflinePlayer player) {
+        return new BukkitFuture<>(() -> {
+
+            String uuid = player.getUniqueId().toString();
+
+            Cache.remove(getIdentifier(player, DataType.NICKNAME));
+            this.db.prepareStatement("UPDATE module_nickname SET nickname=NULL WHERE uuid=? AND nickname IS NOT NULL", uuid);
+
+            return null;
         });
     }
 
@@ -89,12 +97,15 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
             boolean nicknameExists = false;
 
             // get from database at nickname
-            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname WHERE nickname=?", nickname);
+            final PreparedStatement statement = this.db.prepareStatement("SELECT nickname FROM module_nickname WHERE nickname=?", nickname);
             final ResultSet result = statement.executeQuery();
 
             // if exists in database
             if (result.next()) {
-                nicknameExists = true;
+                String storedNickname = result.getString(0);
+                if (Colors.stripColors(storedNickname).equals(Colors.stripColors(nickname))) {
+                    nicknameExists = true;
+                }
             }
 
             return nicknameExists;
