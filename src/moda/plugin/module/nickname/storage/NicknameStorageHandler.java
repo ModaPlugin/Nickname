@@ -5,10 +5,15 @@ import moda.plugin.moda.utils.storage.ModuleStorageHandler;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
 public interface NicknameStorageHandler extends ModuleStorageHandler {
+
+    default String getIdentifier(OfflinePlayer player, DataType dataType) {
+        return player.getUniqueId() + "." + dataType.getIdentifier();
+    }
 
     /**
      * gets the provided player's nickname.
@@ -16,7 +21,7 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
      * @param player
      * @return the player's nickname
      */
-    public BukkitFuture<Optional<String>> getNickname(Player player);
+    BukkitFuture<Optional<String>> getNickname(OfflinePlayer player);
 
     /**
      * sets the nickname for the provided player to the provided nickname.
@@ -24,20 +29,26 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
      * @param player
      * @param nickname
      */
-    public BukkitFuture<Boolean> setNickname(Player player, String nickname);
+    BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname);
 
     /**
      * checks if a nickname already exists in the storage.
      * @param nickname
      * @return whether a nickname is used
      */
-    public BukkitFuture<Boolean> nicknameExists(String nickname);
+    BukkitFuture<Boolean> nicknameExists(String nickname);
 
     /**
      * gets all the Player that use the given nickname, maybe be empty.
      * @param nickname
      * @return a set of players that use the provided nickname
      */
-    public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname);
+    BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname);
+
+    /**
+     * gets all the player data as a HashMap
+     * @return a HashMap containing playerdata (uuid, data)
+     */
+    BukkitFuture<HashMap<String, String>> getAllPlayerData();
 
 }
