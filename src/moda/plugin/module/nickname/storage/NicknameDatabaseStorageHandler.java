@@ -6,16 +6,12 @@ import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
 import moda.plugin.module.nickname.Nickname;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import xyz.derkades.derkutils.caching.Cache;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler implements NicknameStorageHandler {
 
@@ -27,14 +23,19 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
         createTableIfNonexistent("module_nickname", "CREATE TABLE `module_nickname` (`uuid` VARCHAR(100) NOT NULL, `nickname` VARCHAR(" + Nickname.NICKNAME_MAX_LENGTH + ") NOT NULL, PRIMARY KEY (`uuid`)) ENGINE = InnoDB");
     }
 
-    public BukkitFuture<Optional<String>> getNickname(Player player) {
-        return new BukkitFuture<Optional<String>>(() -> {
+    public BukkitFuture<Optional<String>> getNickname(OfflinePlayer player) {
+        return new BukkitFuture<>(() -> {
+
+            // if player has never joined the server
+            if (!player.hasPlayedBefore()) {
+                return Optional.empty(); // return empty optional
+            }
 
             // get nickname from cache
-            Object cache = Cache.getCachedObject("nick." + player.getUniqueId());
+            Optional<Optional<String>> cache = Cache.get(getIdentifier(player, DataType.NICKNAME));
 
             // if nickname doesn't exist in cache
-            if (cache == null) {
+            if (!cache.isPresent()) {
 
                 // get from database
                 final PreparedStatement statement = this.db.prepareStatement("SELECT nickname FROM module_nickname WHERE uuid=?", player.getUniqueId());
@@ -44,34 +45,37 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
                 if (result.next()) {
                     Optional<String> nickname;
                     nickname = Optional.of(result.getString(0));
-                    Cache.addCachedObject("nick." + player.getUniqueId(), nickname); // add to cache
+                    Cache.set(getIdentifier(player, DataType.NICKNAME), nickname); // add to cache
                     return nickname; // return nickname
                 } else {
-                    Cache.addCachedObject("nick." + player.getUniqueId(), Optional.of(player.getDisplayName())); // add empty optional to cache
-                    return Optional.of(player.getDisplayName()); // return empty optional
+                    Cache.set(getIdentifier(player, DataType.NICKNAME), Optional.ofNullable(player.getName())); // update cache to the player's DisplayName
+                    return Optional.ofNullable(player.getName()); // return the player's DisplayName
                 }
             }
 
             // if nickname does exist in cache
             else {
-                return (Optional<String>) cache; // return nickname
+                return cache.get(); // return nickname
             }
         });
     }
 
-    public BukkitFuture<Boolean> setNickname(Player player, String nickname) {
-        return new BukkitFuture<Boolean>(() -> {
+    public BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname) {
+        return new BukkitFuture<>(() -> {
+
+            String uuid = player.getUniqueId().toString();
 
             // if nickname = username, remove nickname
             if (nickname.equals(player.getName())) {
-                Cache.removeCachedObject("nick." + player.getUniqueId());
+                Cache.remove(getIdentifier(player, DataType.NICKNAME));
+                this.db.prepareStatement("UPDATE module_nickname SET nickname=NULL WHERE uuid=? AND nickname IS NOT NULL", uuid);
             }
 
             // update cache
-            Cache.addCachedObject("nick." + player.getUniqueId(), Optional.of(nickname));
+            Cache.set("nickname." + uuid, Optional.of(nickname));
 
             // save to database
-            final PreparedStatement statement = this.db.prepareStatement("INSERT INTO module_nickname (uuid, nickname) VALUES (?, ?) ON DUPLICATE KEY UPDATE nickname=?", player.getUniqueId(), nickname, nickname);
+            final PreparedStatement statement = this.db.prepareStatement("INSERT INTO module_nickname (uuid, nickname) VALUES (?, ?) ON DUPLICATE KEY UPDATE nickname=?", uuid, nickname, nickname);
             statement.execute();
 
             return true;
@@ -80,7 +84,7 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
 
     @Override
     public BukkitFuture<Boolean> nicknameExists(String nickname) {
-        return new BukkitFuture<Boolean>(() -> {
+        return new BukkitFuture<>(() -> {
 
             boolean nicknameExists = false;
 
@@ -98,7 +102,7 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
     }
 
     public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
-        return new BukkitFuture<Set<OfflinePlayer>>(() -> {
+        return new BukkitFuture<>(() -> {
 
 
             // get uuid's that use @nickname
@@ -114,6 +118,26 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
 
             // return set
             return players;
+        });
+    }
+
+    @Override
+    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
+        return new BukkitFuture<>(() -> {
+
+            HashMap<String, String> nicknames = new HashMap<>();
+
+            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname");
+            final ResultSet result = statement.executeQuery();
+
+            while (result.next()) {
+                String uuidString = result.getString(0);;
+                String nickname = result.getString(1);;
+
+                nicknames.put(uuidString, nickname);
+            }
+
+            return nicknames;
         });
     }
 }
