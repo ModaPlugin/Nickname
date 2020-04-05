@@ -1,11 +1,9 @@
 package moda.plugin.module.nickname.storage;
 
-import moda.plugin.moda.utils.BukkitFuture;
-import moda.plugin.moda.utils.storage.ModuleStorageHandler;
+import moda.plugin.moda.module.storage.ModuleStorageHandler;
+import moda.plugin.moda.util.BukkitFuture;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,7 +15,6 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
 
     /**
      * gets the provided player's nickname.
-     * this check the cache first, if it doesn't exist in cache, it will update the cache from the storage.
      * @param player
      * @return the player's nickname
      */
@@ -25,11 +22,18 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
 
     /**
      * sets the nickname for the provided player to the provided nickname.
-     * this updates both the cache and the storage.
      * @param player
      * @param nickname
+     * @return boolean indicating whether it succeeded
      */
-    BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname);
+    BukkitFuture<Void> setNickname(OfflinePlayer player, String nickname);
+
+    /**
+     * removes the nickname from the provided player.
+     * @param player
+     * @return boolean indicating whether it succeeded
+     */
+    BukkitFuture<Void> removeNickname(OfflinePlayer player);
 
     /**
      * checks if a nickname already exists in the storage.
@@ -39,7 +43,7 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
     BukkitFuture<Boolean> nicknameExists(String nickname);
 
     /**
-     * gets all the Player that use the given nickname, maybe be empty.
+     * gets all the Player that use the given nickname, may be empty.
      * @param nickname
      * @return a set of players that use the provided nickname
      */
