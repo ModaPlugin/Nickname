@@ -1,11 +1,11 @@
 package moda.plugin.module.nickname;
 
-import moda.plugin.moda.modules.Module;
-import moda.plugin.moda.modules.command.ModuleCommandBuilder;
-import moda.plugin.moda.utils.placeholders.ModaPlaceholderAPI;
-import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
-import moda.plugin.moda.utils.storage.FileStorageHandler;
-import moda.plugin.moda.utils.storage.StorageMigrator;
+import moda.plugin.moda.module.Module;
+import moda.plugin.moda.module.command.ModuleCommandBuilder;
+import moda.plugin.moda.module.storage.DatabaseStorageHandler;
+import moda.plugin.moda.module.storage.FileStorageHandler;
+import moda.plugin.moda.module.storage.StorageMigrator;
+import moda.plugin.moda.placeholder.ModaPlaceholderAPI;
 import moda.plugin.module.nickname.storage.NicknameDatabaseStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameFileStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
@@ -41,10 +41,10 @@ public class Nickname extends Module<NicknameStorageHandler> {
         return new NicknameFileStorageHandler(this);
     }
 
-    @Override
-    public StorageMigrator<NicknameStorageHandler> getStorageMigrator() {
-        return new NicknameStorageMigrator();
-    }
+//    @Override
+//    public StorageMigrator<NicknameStorageHandler> getStorageMigrator() {
+//        return new NicknameStorageMigrator();
+//    }
 
     @Override
     public void onEnable() throws InvalidConfigurationException {
