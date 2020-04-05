@@ -121,23 +121,23 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
         });
     }
 
-    @Override
-    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
-        return new BukkitFuture<>(() -> {
-
-            HashMap<String, String> nicknames = new HashMap<>();
-
-            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname");
-            final ResultSet result = statement.executeQuery();
-
-            while (result.next()) {
-                String uuidString = result.getString(0);;
-                String nickname = result.getString(1);;
-
-                nicknames.put(uuidString, nickname);
-            }
-
-            return nicknames;
-        });
-    }
+//    @Override
+//    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
+//        return new BukkitFuture<>(() -> {
+//
+//            HashMap<String, String> nicknames = new HashMap<>();
+//
+//            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname");
+//            final ResultSet result = statement.executeQuery();
+//
+//            while (result.next()) {
+//                String uuidString = result.getString(0);;
+//                String nickname = result.getString(1);;
+//
+//                nicknames.put(uuidString, nickname);
+//            }
+//
+//            return nicknames;
+//        });
+//    }
 }
