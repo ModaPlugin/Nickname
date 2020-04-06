@@ -1,5 +1,6 @@
 package moda.plugin.module.nickname;
 
+import java.io.IOException;
 import java.lang.String;
 
 import moda.plugin.moda.util.UuidFetcher;
@@ -13,6 +14,7 @@ import xyz.derkades.derkutils.bukkit.Colors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NicknameCommand implements CommandExecutor, TabCompleter {
@@ -29,19 +31,23 @@ public class NicknameCommand implements CommandExecutor, TabCompleter {
         System.out.println("debug2");
 
         if (args.length == 0 && sender instanceof Player) {
-            AtomicBoolean callback = new AtomicBoolean(false);
-            module.getStorage().getNickname((OfflinePlayer) sender)
+            module.getStorage().getNickname(((Player) sender).getUniqueId())
                     .onComplete(nickname -> {
-                        module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
-                                "NICKNAME", nickname);
+
+                        if (nickname.isPresent()) {
+                            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
+                                    "NICKNAME", nickname.get());
+                        } else {
+                            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
+                                    "NICKNAME", sender.getName());
+                        }
                         module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_DESCRIPTION);
                         module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_USAGE);
-                        callback.set(true);
                     })
                     .onException(e -> {
                         e.printStackTrace();
-                    }).awaitCompletion();
-            return callback.get();
+                    }).retrieveAsync();
+            return true;
         }
 
         if (!sender.hasPermission("moda.module.nickname.set")) {
@@ -86,69 +92,80 @@ public class NicknameCommand implements CommandExecutor, TabCompleter {
                 String finalNickname = nickname;
                 UuidFetcher.getOfflinePlayer(targetName)
                         .onComplete(opt -> {
-                            if (args[0].equals(finalNickname)) {
+                            if (targetName.equals(finalNickname)) {
                                 opt.ifPresent(target -> {
-                                    module.getStorage().removeNickname(target)
+                                    module.getStorage().removeNickname(target.getUniqueId())
                                             .onComplete(var -> {
                                                 module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_REMOVE,
                                                         "TARGET", target.getName());
 
-                                                if (target.isOnline()) {
+                                                if (target.isOnline() && !target.equals(sender)) {
                                                     target.getPlayer().sendMessage(module.getLang().getMessage(NicknameMessage.UPDATE_NOTIFY,
-                                                            "NICKNAME", args[1]));
+                                                            "NICKNAME", finalNickname));
                                                 }
                                             })
                                             .onException(e -> {
                                                 module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_UNKNOWN,
-                                                        "TARGET", args[0]);
+                                                        "TARGET", targetName);
                                                 e.printStackTrace();
-                                            });
+                                            }).retrieveAsync();
                                 });
                             } else {
-
-                                module.getStorage().nicknameExists(finalNickname)
-                                        .onComplete(nicknameExists -> {
-                                            if (nicknameExists) {
-                                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_TAKEN,
-                                                        "NICKNAME", finalNickname);
-                                            }
-                                            if (sender.hasPermission("moda.module.nickname.set.taken")) {
-                                                opt.ifPresent(target -> {
-                                                    module.getStorage().setNickname(target, finalNickname)
-                                                            .onComplete(var -> {
-                                                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_UPDATE,
-                                                                        "TARGET", target.getName(),
-                                                                        "NICKNAME", finalNickname);
-
-                                                                if (target.isOnline()) {
-                                                                    target.getPlayer().sendMessage(module.getLang().getMessage(NicknameMessage.UPDATE_NOTIFY,
-                                                                            "NICKNAME", args[1]));
-                                                                }
-                                                            })
-                                                            .onException(e -> {
-                                                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_UNKNOWN,
-                                                                        "TARGET", args[0]);
-                                                                e.printStackTrace();
-                                                            });
-                                                });
-                                            }
-                                        })
-                                        .onException(e -> {
-                                            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_UNKNOWN,
-                                                    "TARGET", args[0]);
-                                            e.printStackTrace();
-                                        });
+                                if (!sender.hasPermission("moda.module.nickname.set.taken")) {
+                                    module.getStorage().nicknameExists(finalNickname)
+                                            .onComplete(nicknameExists -> {
+                                                if (nicknameExists) {
+                                                    module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_TAKEN,
+                                                            "NICKNAME", finalNickname);
+                                                } else {
+                                                    setNickname(sender, opt, finalNickname);
+                                                }
+                                            })
+                                            .onException(e -> {
+                                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_UNKNOWN,
+                                                        "TARGET", targetName);
+                                                e.printStackTrace();
+                                            }).retrieveAsync();
+                                } else {
+                                    setNickname(sender, opt, finalNickname);
+                                }
                             }
                         })
                         .onException(e -> {
                             module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_INVALID_PLAYER,
-                                    "TARGET", args[0]);
+                                    "TARGET", targetName);
                             e.printStackTrace();
-                        });
+                        }).retrieveAsync();
                 return true;
             }
         }
         return true;
+    }
+
+    private void setNickname(CommandSender sender, Optional<OfflinePlayer> opt, String nickname) {
+        opt.ifPresent(target -> {
+            try {
+                module.getFileStorageHandler().setProperty(target.getUniqueId(), "debug", "debug");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            module.getStorage().setNickname(target.getUniqueId(), nickname)
+                    .onComplete(var -> {
+                        module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_UPDATE,
+                                "TARGET", target.getName(),
+                                "NICKNAME", nickname);
+
+                        if (target.isOnline() && !target.equals(sender)) {
+                            target.getPlayer().sendMessage(module.getLang().getMessage(NicknameMessage.UPDATE_NOTIFY,
+                                    "NICKNAME", nickname));
+                        }
+                    })
+                    .onException(e -> {
+                        module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_ERROR_UNKNOWN,
+                                "TARGET", nickname);
+                        e.printStackTrace();
+                    }).retrieveAsync();
+        });
     }
 
     @Override
