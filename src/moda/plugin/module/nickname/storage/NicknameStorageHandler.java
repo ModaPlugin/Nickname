@@ -6,34 +6,35 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public interface NicknameStorageHandler extends ModuleStorageHandler {
 
-    default String getIdentifier(OfflinePlayer player, DataType dataType) {
-        return player.getUniqueId() + "." + dataType.getIdentifier();
-    }
+//    default String getIdentifier(OfflinePlayer player, DataType dataType) {
+//        return player.getUniqueId() + "." + dataType.getIdentifier();
+//    }
 
     /**
      * gets the provided player's nickname.
-     * @param player
+     * @param uuid
      * @return the player's nickname
      */
-    BukkitFuture<Optional<String>> getNickname(OfflinePlayer player);
+    BukkitFuture<Optional<String>> getNickname(UUID uuid);
 
     /**
      * sets the nickname for the provided player to the provided nickname.
-     * @param player
+     * @param uuid
      * @param nickname
      * @return boolean indicating whether it succeeded
      */
-    BukkitFuture<Void> setNickname(OfflinePlayer player, String nickname);
+    BukkitFuture<Void> setNickname(UUID uuid, String nickname);
 
     /**
      * removes the nickname from the provided player.
-     * @param player
+     * @param uuid
      * @return boolean indicating whether it succeeded
      */
-    BukkitFuture<Void> removeNickname(OfflinePlayer player);
+    BukkitFuture<Void> removeNickname(UUID uuid);
 
     /**
      * checks if a nickname already exists in the storage.
