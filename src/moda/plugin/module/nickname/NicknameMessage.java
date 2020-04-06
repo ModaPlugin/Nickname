@@ -40,7 +40,7 @@ public enum NicknameMessage implements IMessage {
     COMMAND_NICKNAME_OTHER_UPDATE(
             // Level.INFO,
             "commands.nickname.other.update",
-            "&7You've set {TARGET}&7's nickname to &a{NICKNAME}&7."),
+            "&7You've set {TARGET}&7's nickname to &f{NICKNAME}&7."),
     COMMAND_NICKNAME_OTHER_REMOVE(
             // Level.INFO,
             "commands.nickname.other.reset",
