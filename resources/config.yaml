@@ -1,0 +1,13 @@
+###############################################################
+#                           Nickname                          #
+###############################################################
+
+# The Nickname module allows players to set nicknames
+
+# the Nickname module adds a {NICKNAME} placeholder to the Moda core placeholders
+
+max-length: 16
+
+# Useful related modules:
+# - ChatFormat      https://github.com/modaplugin/ChatFormat
+# - ChatColor       https://github.com/modaplugin/ChatColor
