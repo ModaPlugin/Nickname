@@ -1,20 +1,21 @@
 package moda.plugin.module.nickname;
 
 import moda.plugin.moda.module.IMessage;
-import moda.plugin.moda.module.LangFile;
 import moda.plugin.moda.module.Module;
 import moda.plugin.moda.module.command.ModuleCommandBuilder;
 import moda.plugin.moda.module.storage.DatabaseStorageHandler;
 import moda.plugin.moda.module.storage.FileStorageHandler;
-import moda.plugin.moda.module.storage.StorageMigrator;
 import moda.plugin.moda.placeholder.ModaPlaceholderAPI;
 import moda.plugin.module.nickname.storage.NicknameDatabaseStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameFileStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
-import moda.plugin.module.nickname.storage.NicknameStorageMigrator;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
+import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Nickname extends Module<NicknameStorageHandler> {
 
@@ -44,7 +45,24 @@ public class Nickname extends Module<NicknameStorageHandler> {
         if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > 128) {
             throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }
-        ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> this.getStorage().getNickname(player));
+        ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
+            String nickname = ChatColor.RED + player.getDisplayName();
+
+            try {
+                Optional<String> opt = this.getStorage().getNickname(player.getUniqueId()).get();
+                nickname = player.getDisplayName();
+
+                if (opt.isPresent()) {
+                    nickname = Colors.parseColors(opt.get());
+                }
+
+            } catch (Exception e) {
+                nickname = ChatColor.RED + player.getDisplayName();
+                e.printStackTrace();
+            }
+
+            return nickname;
+        });
         this.registerCommand(
                 new ModuleCommandBuilder("nickname")
                         .withExecutor(new NicknameCommand(this))
