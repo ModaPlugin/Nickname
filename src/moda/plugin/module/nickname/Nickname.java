@@ -15,11 +15,12 @@ import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Nickname extends Module<NicknameStorageHandler> {
 
     public static final int NICKNAME_MAX_LENGTH = 128;
+
+    public static Nickname instance;
 
     public String getName() {
         return "Nickname";
@@ -42,6 +43,9 @@ public class Nickname extends Module<NicknameStorageHandler> {
 
     @Override
     public void onEnable() throws InvalidConfigurationException {
+
+        instance = this;
+
         if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > 128) {
             throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }

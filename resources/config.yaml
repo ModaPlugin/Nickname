@@ -8,6 +8,9 @@
 
 max-length: 16
 
+blacklisted-colors:
+  - DARK_RED
+
 # Useful related modules:
 # - ChatFormat      https://github.com/modaplugin/ChatFormat
 # - ChatColor       https://github.com/modaplugin/ChatColor
