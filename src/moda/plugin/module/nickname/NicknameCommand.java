@@ -28,25 +28,26 @@ public class NicknameCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        System.out.println("debug2");
+        if (args.length == 0) {
+            if (sender instanceof Player) {
+                module.getStorage().getNickname(((Player) sender).getUniqueId())
+                        .onComplete(nickname -> {
 
-        if (args.length == 0 && sender instanceof Player) {
-            module.getStorage().getNickname(((Player) sender).getUniqueId())
-                    .onComplete(nickname -> {
+                            if (nickname.isPresent()) {
+                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
+                                        "NICKNAME", nickname.get());
+                            } else {
+                                module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
+                                        "NICKNAME", sender.getName());
+                            }
+                        })
+                        .onException(e -> {
 
-                        if (nickname.isPresent()) {
-                            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
-                                    "NICKNAME", nickname.get());
-                        } else {
-                            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
-                                    "NICKNAME", sender.getName());
-                        }
-                        module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_DESCRIPTION);
-                        module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_USAGE);
-                    })
-                    .onException(e -> {
-                        e.printStackTrace();
-                    }).retrieveAsync();
+                            e.printStackTrace();
+                        }).retrieveAsync();
+            }
+            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_DESCRIPTION);
+            module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_USAGE);
             return true;
         }
 
@@ -84,13 +85,9 @@ public class NicknameCommand implements CommandExecutor, TabCompleter {
 
 
 
-            System.out.println("debug4");
-
         }
 
         if (args.length == 2) {
-
-            System.out.println("debug3");
 
             String targetName = args[0];
 
