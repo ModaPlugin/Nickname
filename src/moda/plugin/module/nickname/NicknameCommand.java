@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.lang.String;
 
 import moda.plugin.moda.util.UuidFetcher;
+import moda.plugin.module.nickname.utils.Colors;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
-import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,17 +66,23 @@ public class NicknameCommand implements CommandExecutor, TabCompleter {
 
         String nickname = args[args.length - 1];
 
-        if (!sender.hasPermission("moda.module.nickname.set.color")) {
+        if (sender.hasPermission("moda.module.nickname.set.color")) {
+            nickname = Colors.parseColors(sender, nickname);
+        } else {
             nickname = Colors.stripColors(nickname);
             module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_COLOR);
         }
 
-        if (!sender.hasPermission("moda.module.nickname.set.format")) {
+        if (sender.hasPermission("moda.module.nickname.set.format")) {
+            nickname = Colors.parseColors(sender, nickname);
+        } else {
             nickname = Colors.stripColors(nickname);
             module.getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_FORMAT);
         }
 
         if (args.length == 1) {
+
+
 
             System.out.println("debug4");
 
