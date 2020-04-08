@@ -72,7 +72,6 @@ public class Nickname extends Module<NicknameStorageHandler> {
                         .withExecutor(new NicknameCommand(this))
                         .withTabCompleter(new NicknameCommand(this))
                         .withDescription("opens a GUI to set a nickname.")
-                        .withPermission("moda.module.nickname.set")
                         .withUsage("/nickname")
                         .withAlias("nick")
                         .create());
