@@ -8,8 +8,18 @@
 
 max-length: 16
 
+# colors that no one (except for people with the "moda.plugin.module.nickname.set.color.blacklist.bypass") can use regardless of color-specific permissions.
+
+# this means that you can give a rank the "moda.plugin.module.nickname.set.color" without giving them access to the blacklisted colors
+
+# a default list of hard-to-read colors
+# refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/ChatColor.html for all color names
 blacklisted-colors:
-  - DARK_RED
+  - dark_red
+  - black
+  - dark_blue
+  - magic             # the twitchy one
+  - strikethrough
 
 # Useful related modules:
 # - ChatFormat      https://github.com/modaplugin/ChatFormat
