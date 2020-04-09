@@ -31,7 +31,6 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
-    @Override
     public BukkitFuture<Void> setNickname(UUID uuid, String nickname) {
         return new BukkitFuture<>(() -> {
 
@@ -41,7 +40,6 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
-    @Override
     public BukkitFuture<Void> removeNickname(UUID uuid) {
         return new BukkitFuture<>(() -> {
 
@@ -51,7 +49,6 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
-    @Override
     public BukkitFuture<Boolean> nicknameExists(String nickname) {
         return new BukkitFuture<>(() -> {
 
@@ -69,20 +66,30 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
-    @Override
     public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
         return new BukkitFuture<>(() -> {
+            String finalNickname = Colors.stripColors(nickname);
 
             Set<OfflinePlayer> players = new HashSet<>();
 
             for (UUID uuid : getUuids()) {
 
-                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
+                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
 
-                if (storedNickname.isPresent() && storedNickname.equals(nickname)) {
-                    players.add(Bukkit.getOfflinePlayer(uuid));
+                if (opt.isPresent()) {
+                    String storedNickname = Colors.stripColors(opt.get());
+                    if (storedNickname.equals(finalNickname)) {
+                        players.add(Bukkit.getOfflinePlayer(uuid));
+                    }
                 }
             }
+
+            for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                if (player.getName().equals(finalNickname)) {
+                    players.add(player);
+                }
+            }
+
             return players;
         });
     }
