@@ -50,10 +50,10 @@ public class Nickname extends Module<NicknameStorageHandler> {
             throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }
         ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
-            String nickname = ChatColor.RED + player.getDisplayName();
+            String nickname;
 
             try {
-                Optional<String> opt = this.getStorage().getNickname(player.getUniqueId()).get();
+                Optional<String> opt = this.getStorage().getNickname(player.getUniqueId()).callBlocking();
                 nickname = player.getDisplayName();
 
                 if (opt.isPresent()) {
