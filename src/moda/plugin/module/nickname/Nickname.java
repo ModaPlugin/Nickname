@@ -66,7 +66,7 @@ public class Nickname extends Module<NicknameStorageHandler> {
                 e.printStackTrace();
             }
 
-            return nickname;
+            return nickname + ChatColor.RESET;
         });
         this.registerCommand(
                 new ModuleCommandBuilder("nickname")
