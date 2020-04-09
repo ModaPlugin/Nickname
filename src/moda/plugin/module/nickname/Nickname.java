@@ -52,6 +52,7 @@ public class Nickname extends Module<NicknameStorageHandler> {
         ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
             String nickname;
 
+            // TODO async papi handling
             try {
                 Optional<String> opt = this.getStorage().getNickname(player.getUniqueId()).callBlocking();
                 nickname = player.getDisplayName();

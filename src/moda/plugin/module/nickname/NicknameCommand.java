@@ -13,6 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements TabCompleter {
@@ -24,17 +25,47 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
+        // send own nickname
+        if (args.length == 0) {
+            if (sender instanceof Player) {
+                sendNickname((Player) sender)
+                        .onComplete(var -> {
+                            sendUsage(sender);
+                        }).callAsync();
+                return true;
+            }
+            sendUsage(sender);
+            return true;
+        }
+
+        // too many arguments
+        else if (args.length > 2) {
+            tooManyArguments(sender);
+            return true;
+        }
+
         BukkitFuture<OfflinePlayer> future = getTarget(sender, args);
 
-        future.callAsync()
-                .onComplete(target -> {
+        future.onComplete(target -> {
                     if (checkPermission(sender, target)) {
 
                         String nickname = args[args.length -1];
 
                         setNickname(sender, target, nickname, sender == target ? sender.getName() : args[0]);
                     } else {
-                        errorPermission(sender, target);
+                        if (sender == target) {
+                            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_NO_PERMISSION_SELF,
+                                    "PERMISSION", "moda.module.nickname.set");
+                        } else {
+                            try {
+                                getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_NO_PERMISSION_OTHER,
+                                        "TARGET", getStorage().getNickname(target.getUniqueId()).callBlocking(),
+                                        "PERMISSION", "moda.module.nickname.set.others");
+                            } catch (Exception e) {
+                                getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_UNKNOWN);
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 })
                 .onException(e -> {
@@ -54,16 +85,8 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
 
         OfflinePlayer target;
 
-        if (args.length == 0) {
-            if (sender instanceof Player) {
-                sendNickname((Player) sender);
-            }
-            sendUsage(sender);
-            return new BukkitFuture<>(() -> null);
-        }
-
         // no provided target, target = sender
-        else if (args.length == 1) {
+        if (args.length == 1) {
             if (sender instanceof Player) {
                 return new BukkitFuture<>(() -> (OfflinePlayer) sender);
             } else {
@@ -73,7 +96,7 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
         }
 
         // get target from provided name
-        else if (args.length == 2) {
+        else {
             return new BukkitFuture<OfflinePlayer>(() -> {
 
                 Set<OfflinePlayer> players = getStorage().getPlayersByNickname(args[0]).callBlocking();
@@ -87,12 +110,6 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
                     return players.iterator().next();
                 }
             });
-        }
-
-        // too many arguments
-        else {
-            tooManyArguments(sender);
-            return new BukkitFuture<>(() -> null);
         }
     }
 
@@ -151,9 +168,20 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
         }
     }
 
-    private void sendNickname(Player sender) {
-        getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
-                "NICKNAME", getStorage().getNickname(sender.getUniqueId()));
+    private BukkitFuture<Void> sendNickname(Player sender) {
+        return new BukkitFuture<>(() -> {
+
+            Optional<String> opt = getStorage().getNickname(sender.getUniqueId()).callBlocking();
+            String nickname = sender.getDisplayName();
+
+            if (opt.isPresent()) {
+                nickname = opt.get();
+            }
+
+            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_GET,
+                    "NICKNAME", nickname);
+            return null;
+        });
     }
 
     private void invalidSender(CommandSender sender) {
@@ -179,17 +207,6 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
 
     private void errorUnknown(CommandSender sender) {
         getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_UNKNOWN);
-    }
-
-    private void errorPermission(CommandSender sender, OfflinePlayer target) {
-        if (sender == target) {
-            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_NO_PERMISSION_SELF,
-                    "PERMISSION", "moda.module.nickname.set");
-        } else {
-            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_NO_PERMISSION_OTHER,
-                    "TARGET", getStorage().getNickname(target.getUniqueId()),
-                    "PERMISSION", "moda.module.nickname.set.others");
-        }
     }
 
     private LangFile getLang() {

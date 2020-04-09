@@ -20,7 +20,7 @@ public enum NicknameMessage implements IMessage {
     COMMAND_NICKNAME_USAGE(
             // Level.INFO,
             "commands.nickname.usage",
-            "&f/nickname &7[nickname|&8(target <nickname>)]"),
+            "&f/nickname &7[nickname | &8(target <nickname>)]"),
     COMMAND_NICKNAME_SELF_GET(
             // Level.INFO,
             "commands.nickname.self.get",
