@@ -1,6 +1,7 @@
 package moda.plugin.module.nickname.utils;
 
 import moda.plugin.module.nickname.Nickname;
+import moda.plugin.module.nickname.NicknameMessage;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -20,6 +21,9 @@ public class Colors {
                 if (c.hasPermission("moda.plugin.module.nickname.set.color." + color.getName()) && !isBlacklisted(color)) {
                     s = s.replace("&" + code, ChatColor.COLOR_CHAR + "" + code);
                 } else {
+                    n.getLang().send(c, NicknameMessage.COMMAND_NICKNAME_WARN_COLOR_CODE,
+                            "PERMISSION", "moda.module.nickname.set.color." + ChatColor.getByChar(code).getName(),
+                            "CODE", "&" + code + ChatColor.getByChar(code).getName());
                     s = s.replace("&" + code, "");
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -47,5 +51,15 @@ public class Colors {
 
     public static String stripColors(String s) {
         return xyz.derkades.derkutils.bukkit.Colors.stripColors(s);
+    }
+
+    public static String stripFormatting(String s) {
+        return xyz.derkades.derkutils.bukkit.Colors.stripColors(s);
+    }
+
+    public static String strip(String s) {
+        s = stripColors(s);
+        s = stripFormatting(s);
+        return s;
     }
 }
