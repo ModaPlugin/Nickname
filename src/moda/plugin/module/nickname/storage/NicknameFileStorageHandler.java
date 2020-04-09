@@ -57,7 +57,7 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
                 Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
 
                 if (storedNickname.isPresent()) {
-                    if (Colors.stripColors(storedNickname.get()).equals(Colors.stripColors(nickname))) {
+                    if (Colors.stripColors(storedNickname.get()).equalsIgnoreCase(Colors.stripColors(nickname))) {
                         return true;
                     }
                 }
@@ -78,14 +78,14 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
 
                 if (opt.isPresent()) {
                     String storedNickname = Colors.stripColors(opt.get());
-                    if (storedNickname.equals(finalNickname)) {
+                    if (storedNickname.equalsIgnoreCase(finalNickname)) {
                         players.add(Bukkit.getOfflinePlayer(uuid));
                     }
                 }
             }
 
             for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-                if (player.getName().equals(finalNickname)) {
+                if (player.getName().equalsIgnoreCase(finalNickname)) {
                     players.add(player);
                 }
             }

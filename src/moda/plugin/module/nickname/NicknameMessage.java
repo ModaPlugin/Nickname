@@ -36,15 +36,15 @@ public enum NicknameMessage implements IMessage {
     COMMAND_NICKNAME_OTHER_UPDATE(
             // Level.INFO,
             "commands.nickname.other.update",
-            "&7You've set {TARGET}&7's nickname to &f{NICKNAME}&7."),
+            "&7You've set &f{TARGET}&7's nickname to &f{NICKNAME}&7."),
     COMMAND_NICKNAME_OTHER_REMOVE(
             // Level.INFO,
             "commands.nickname.other.reset",
-            "&7You've reset &8(removed)&7 {TARGET}&7's nickname."),
+            "&7You've reset &8(removed)&7 &f{TARGET}&7's nickname."),
     COMMAND_NICKNAME_OTHER_ERROR_INVALID_TARGET(
             // Level.SEVERE,
             "commands.nickname.other.error.player-not-found",
-            "&cThe target &f{TARGET}&c was not found, is &7{TARGET}&c a valid minecraft user?"),
+            "&cThe target &f{TARGET}&c was not found, is &f{TARGET}&c a valid minecraft user?"),
     COMMAND_NICKNAME_WARN_COLOR_BLACKLISTED(
             // Level.WARNING,
             "commands.nickname.warn.color.blacklisted",
