@@ -6,6 +6,7 @@ import moda.plugin.moda.util.BukkitFuture;
 import moda.plugin.moda.util.UuidFetcher;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
 import moda.plugin.module.nickname.utils.Colors;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -122,6 +123,8 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
     }
 
     private void setNickname(CommandSender sender, OfflinePlayer target, String nickname, String targetName) {
+
+        if (nickname.contains(ChatColor.COLOR_CHAR + "")) nickname = Colors.strip(nickname);
 
         if (sender.hasPermission("moda.module.nickname.set.color")) {
             nickname = Colors.parseColors(sender, nickname);

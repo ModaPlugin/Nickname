@@ -48,11 +48,11 @@ public enum NicknameMessage implements IMessage {
     COMMAND_NICKNAME_WARN_COLOR_BLACKLISTED(
             // Level.WARNING,
             "commands.nickname.warn.color.blacklisted",
-            "&f{COLOR}&r&6 has been blacklisted by an admin, the nickname will be set without &f{COLOR}&r&6."),
+            "&f{CODE}&r&6 has been blacklisted by an admin, the nickname will be set without &f{CODE}&r&6."),
     COMMAND_NICKNAME_WARN_COLOR_CODE(
             // Level.WARNING,
             "commands.nickname.warn.color.code",
-            "&6You need the permission &f{PERMISSION}&6 to use &f{COLOR}&r&6 in your nickname, the nickname will be set without &f{COLOR}&r&6."),
+            "&6You need the permission &f{PERMISSION}&6 to use &f{CODE}&r&6 in your nickname, the nickname will be set without &f{CODE}&r&6."),
     COMMAND_NICKNAME_WARN_COLOR_COLOR(
             // Level.WARNING,
             "commands.nickname.warn.color.color",
