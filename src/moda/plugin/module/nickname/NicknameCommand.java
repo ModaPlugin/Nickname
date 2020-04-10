@@ -84,8 +84,6 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
      */
     private BukkitFuture<OfflinePlayer> getTarget(CommandSender sender, String[] args) {
 
-        OfflinePlayer target;
-
         // no provided target, target = sender
         if (args.length == 1) {
             if (sender instanceof Player) {

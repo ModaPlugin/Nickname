@@ -1,9 +1,6 @@
 package moda.plugin.module.nickname.storage;
 
 import moda.plugin.moda.module.storage.StorageMigrator;
-import org.bukkit.Bukkit;
-
-import java.util.UUID;
 
 @Deprecated
 public class NicknameStorageMigrator implements StorageMigrator<NicknameStorageHandler> {

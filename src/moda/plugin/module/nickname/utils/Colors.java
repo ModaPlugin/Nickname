@@ -4,7 +4,6 @@ import moda.plugin.module.nickname.Nickname;
 import moda.plugin.module.nickname.NicknameMessage;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
-import xyz.derkades.derkutils.bukkit.Chat;
 
 import java.lang.reflect.Field;
 import java.util.List;

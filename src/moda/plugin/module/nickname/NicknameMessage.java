@@ -2,7 +2,7 @@ package moda.plugin.module.nickname;
 
 import moda.plugin.moda.module.IMessage;
 
-import java.util.logging.Level;
+// import java.util.logging.Level;
 
 public enum NicknameMessage implements IMessage {
     UPDATE_NOTIFY(
