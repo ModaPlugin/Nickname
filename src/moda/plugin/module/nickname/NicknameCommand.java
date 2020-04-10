@@ -138,15 +138,23 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
             getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_COLOR_FORMAT);
         }
 
+        // TODO target update notification
         if (targetName.equals(Colors.strip(nickname))) {
             String finalNickname = nickname;
             getStorage().removeNickname(target.getUniqueId())
                     .onComplete(var -> {
-                        if (target == sender) getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_REMOVE,
-                                "NICKNAME", finalNickname);
-                        else getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_REMOVE,
-                                "TARGET", target.getName(),
-                                "NICKNAME", finalNickname);
+                        if (target == sender) {
+                            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_REMOVE,
+                                    "NICKNAME", finalNickname);
+                        }
+                        else {
+                            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_REMOVE,
+                                    "TARGET", target.getName(),
+                                    "NICKNAME", finalNickname);
+                            if (target.isOnline()) {
+                                getLang().send((Player) target, NicknameMessage.UPDATE_REMOVE);
+                            }
+                        }
                     })
                     .onException(e -> {
                         getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_UNKNOWN);
@@ -156,11 +164,19 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
             String finalNickname = nickname;
             getStorage().setNickname(target.getUniqueId(), nickname)
                     .onComplete(var -> {
-                        if (target == sender) getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_UPDATE,
-                                "NICKNAME", finalNickname);
-                        else getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_UPDATE,
-                                "TARGET", target.getName(),
-                                "NICKNAME", finalNickname);
+                        if (target == sender) {
+                            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_SELF_UPDATE,
+                                    "NICKNAME", finalNickname);
+                        }
+                        else {
+                            getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_OTHER_UPDATE,
+                                    "TARGET", target.getName(),
+                                    "NICKNAME", finalNickname);
+                            if (target.isOnline()) {
+                                getLang().send((Player) target, NicknameMessage.UPDATE_NOTIFY,
+                                        "NICKNAME", finalNickname);
+                            }
+                        }
                     })
                     .onException(e -> {
                         getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_ERROR_UNKNOWN);
