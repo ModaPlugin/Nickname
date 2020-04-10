@@ -7,10 +7,6 @@ import moda.plugin.module.nickname.Nickname;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import xyz.derkades.derkutils.bukkit.Colors;
-import xyz.derkades.derkutils.caching.Cache;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
