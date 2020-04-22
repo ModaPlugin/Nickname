@@ -7,15 +7,17 @@ import moda.plugin.moda.util.UuidFetcher;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
 import moda.plugin.module.nickname.utils.Colors;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements TabCompleter {
 
@@ -120,7 +122,27 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
         }
     }
 
+    // TODO dont check dupe nickname when player changing own nickname
+
     private void setNickname(CommandSender sender, OfflinePlayer target, String nickname, String targetName) {
+        boolean nicknameExists = true;
+
+        try {
+            nicknameExists = getStorage().nicknameExists(nickname).callBlocking();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // TODO optimize nested if statements
+        if (nicknameExists) {
+            if (target != sender) {
+                getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_TAKEN,
+                        "NICKNAME", nickname);
+                if (!sender.hasPermission("moda.module.nickname.set.taken")) {
+                    return;
+                }
+            }
+        }
 
         if (nickname.contains(ChatColor.COLOR_CHAR + "")) nickname = Colors.strip(nickname);
 
@@ -138,8 +160,7 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
             getLang().send(sender, NicknameMessage.COMMAND_NICKNAME_WARN_COLOR_FORMAT);
         }
 
-        // TODO target update notification
-        if (targetName.equals(Colors.strip(nickname))) {
+        if (targetName.equals(nickname)) {
             String finalNickname = nickname;
             getStorage().removeNickname(target.getUniqueId())
                     .onComplete(var -> {
@@ -234,9 +255,46 @@ public class NicknameCommand extends ModuleCommandExecutor<Nickname> implements 
         return getModule().getStorage();
     }
 
-    // TODO
+    // TODO setting to only do tab complete after a given amount of characters has been typed (tabcomplete-min-char)
+    // TODO make tab completer not list duplicate usernames.
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return null;
+    public List<String> onTabComplete(CommandSender s, Command c, String label, String[] args) {
+
+        List<String> players = new ArrayList<>();
+        List<String> completions = new ArrayList<>();
+
+        if (s.hasPermission("moda.module.nickname.set.others")) {
+            players.addAll(Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName).collect(Collectors.toList()));
+
+//            getStorage().getStoredNicknames()
+//                    .onComplete(players::addAll)
+//                    .onException(Throwable::printStackTrace)
+//                    .callAsync();
+
+            try {
+                players.addAll(getStorage().getStoredNicknames().callBlocking().stream().map(Colors::strip).collect(Collectors.toList()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (args.length == 1) {
+            StringUtil.copyPartialMatches(args[0], players, completions);
+        }
+        if (args.length == 2) {
+            completions.clear();
+            try {
+                completions.addAll(getStorage().getPlayersByNickname(args[0]).callBlocking().stream().map(p -> {
+                    return Colors.strip(p.getName());
+                }).collect(Collectors.toList()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        Collections.sort(completions);
+        return completions;
     }
 }
