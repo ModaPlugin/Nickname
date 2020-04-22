@@ -10,6 +10,7 @@ import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NicknameFileStorageHandler extends YamlStorageHandler implements NicknameStorageHandler {
 
@@ -91,6 +92,21 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
             }
 
             return players;
+        });
+    }
+
+    @Override
+    public BukkitFuture<Set<String>> getStoredNicknames() {
+        return new BukkitFuture<>(() -> {
+
+            List<UUID> uuids = new ArrayList<>(getUuids());
+
+            Set<String> nicknames = uuids.stream().map(uuid -> {
+                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
+                return opt.orElse("");
+            }).collect(Collectors.toSet());
+
+            return nicknames;
         });
     }
 }

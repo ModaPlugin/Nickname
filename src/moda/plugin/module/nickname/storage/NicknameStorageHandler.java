@@ -50,6 +50,13 @@ public interface NicknameStorageHandler extends ModuleStorageHandler {
      */
     BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname);
 
+    /**
+     * gets all stored nicknames (nicknames that are currently set), may be empty
+     * @return a set of stored nicknames
+     */
+
+    BukkitFuture<Set<String>> getStoredNicknames();
+
 //    /**
 //     * gets all the player data as a HashMap
 //     * @return a HashMap containing playerdata (uuid, data)
