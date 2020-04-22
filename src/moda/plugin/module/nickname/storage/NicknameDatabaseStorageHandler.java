@@ -89,4 +89,10 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
             return players;
         });
     }
+
+    // TODO
+    @Override
+    public BukkitFuture<Set<String>> getStoredNicknames() {
+        return null;
+    }
 }
