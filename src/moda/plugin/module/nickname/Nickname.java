@@ -1,34 +1,29 @@
 package moda.plugin.module.nickname;
 
-import moda.plugin.moda.modules.Module;
-import moda.plugin.moda.utils.placeholders.ModaPlaceholderAPI;
-import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
-import moda.plugin.moda.utils.storage.FileStorageHandler;
-import moda.plugin.moda.utils.storage.StorageMigrator;
-import moda.plugin.module.nickname.commands.NicknameCommand;
+import moda.plugin.moda.module.IMessage;
+import moda.plugin.moda.module.Module;
+import moda.plugin.moda.module.command.ModuleCommandBuilder;
+import moda.plugin.moda.module.storage.DatabaseStorageHandler;
+import moda.plugin.moda.module.storage.FileStorageHandler;
+import moda.plugin.moda.placeholder.ModaPlaceholderAPI;
 import moda.plugin.module.nickname.storage.NicknameDatabaseStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameFileStorageHandler;
 import moda.plugin.module.nickname.storage.NicknameStorageHandler;
-import moda.plugin.module.nickname.storage.NicknameStorageMigrator;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
+import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class Nickname extends Module<NicknameStorageHandler> {
 
-    /* TODO
-    - nickname storage methods
-    - caching
-    - persistence save method for onDisable()
-    - permissions
-    - nickname command
-    - nickname GUI
-     */
-
     public static final int NICKNAME_MAX_LENGTH = 128;
 
+    public static Nickname instance;
+
     public String getName() {
-        return null;
+        return "Nickname";
     }
 
     @Override
@@ -42,22 +37,44 @@ public class Nickname extends Module<NicknameStorageHandler> {
     }
 
     @Override
-    public StorageMigrator<NicknameStorageHandler> getStorageMigrator() {
-        return new NicknameStorageMigrator();
+    public IMessage[] getMessages() {
+        return NicknameMessage.values();
     }
 
     @Override
     public void onEnable() throws InvalidConfigurationException {
-        if (getConfig().getInt("nickname.max-length", NICKNAME_MAX_LENGTH) > 128) {
+
+        instance = this;
+
+        if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > 128) {
             throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }
-        ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> this.getStorage().getNickname(player));
-        getLogger().info("Nickname module enabled.");
-        this.registerCommand(new NicknameCommand());
-    }
+        ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
+            String nickname;
 
-    @Override
-    public void onDisable() {
-        getLogger().info("Nickname module disabled.");
+            // TODO async papi handling
+            try {
+                Optional<String> opt = this.getStorage().getNickname(player.getUniqueId()).callBlocking();
+                nickname = player.getDisplayName();
+
+                if (opt.isPresent()) {
+                    nickname = Colors.parseColors(opt.get());
+                }
+
+            } catch (Exception e) {
+                nickname = ChatColor.RED + player.getDisplayName();
+                e.printStackTrace();
+            }
+
+            return nickname + ChatColor.RESET;
+        });
+        this.registerCommand(
+                new ModuleCommandBuilder("nickname")
+                        .withExecutor(new NicknameCommand(this))
+                        .withTabCompleter(new NicknameCommand(this))
+                        .withDescription("opens a GUI to set a nickname.")
+                        .withUsage("/nickname")
+                        .withAlias("nick")
+                        .create());
     }
 }

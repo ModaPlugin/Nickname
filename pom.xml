@@ -9,7 +9,7 @@
     <artifactId>nickname</artifactId>
 
     <name>Nickname</name>
-    <version>1.0</version>
+    <version>canary</version>
 
     <build>
         <finalName>${project.name}</finalName>
@@ -38,13 +38,6 @@
                     <minimizeJar>true</minimizeJar>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
 
-                    <relocations>
-                        <relocation>
-                            <pattern>xyz.derkades.derkutils</pattern>
-                            <shadedPattern>moda.plugin.module.chat.format.lib.derkutils</shadedPattern>
-                        </relocation>
-                    </relocations>
-
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
@@ -67,24 +60,13 @@
         <dependency>
             <groupId>moda.plugin</groupId>
             <artifactId>moda</artifactId>
-            <version>alpha</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <version>canary</version>
             <scope>provided</scope>
         </dependency>
 
     </dependencies>
 
     <repositories>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
 
         <repository>
             <id>spigot-repo</id>

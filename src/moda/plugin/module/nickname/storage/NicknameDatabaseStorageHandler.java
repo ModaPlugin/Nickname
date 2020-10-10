@@ -1,19 +1,18 @@
 package moda.plugin.module.nickname.storage;
 
-import moda.plugin.moda.modules.Module;
-import moda.plugin.moda.utils.BukkitFuture;
-import moda.plugin.moda.utils.storage.DatabaseStorageHandler;
+import moda.plugin.moda.module.Module;
+import moda.plugin.moda.module.storage.DatabaseStorageHandler;
+import moda.plugin.moda.util.BukkitFuture;
 import moda.plugin.module.nickname.Nickname;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import xyz.derkades.derkutils.caching.Cache;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import xyz.derkades.derkutils.bukkit.Colors;
 import java.sql.SQLException;
 import java.util.*;
 
 public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler implements NicknameStorageHandler {
+
+    private static final String PROPERTY_NICKNAME = "nickname";
 
     public NicknameDatabaseStorageHandler(Module<?> module) {
         super(module);
@@ -23,62 +22,35 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
         createTableIfNonexistent("module_nickname", "CREATE TABLE `module_nickname` (`uuid` VARCHAR(100) NOT NULL, `nickname` VARCHAR(" + Nickname.NICKNAME_MAX_LENGTH + ") NOT NULL, PRIMARY KEY (`uuid`)) ENGINE = InnoDB");
     }
 
-    public BukkitFuture<Optional<String>> getNickname(OfflinePlayer player) {
+    public BukkitFuture<Optional<String>> getNickname(UUID uuid) {
         return new BukkitFuture<>(() -> {
 
-            // if player has never joined the server
-            if (!player.hasPlayedBefore()) {
-                return Optional.empty(); // return empty optional
-            }
+            Optional<String> nickname;
 
-            // get nickname from cache
-            Optional<Optional<String>> cache = Cache.get(getIdentifier(player, DataType.NICKNAME));
+            nickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-            // if nickname doesn't exist in cache
-            if (!cache.isPresent()) {
+            return nickname;
 
-                // get from database
-                final PreparedStatement statement = this.db.prepareStatement("SELECT nickname FROM module_nickname WHERE uuid=?", player.getUniqueId());
-                final ResultSet result = statement.executeQuery();
-
-                // if exists in database
-                if (result.next()) {
-                    Optional<String> nickname;
-                    nickname = Optional.of(result.getString(0));
-                    Cache.set(getIdentifier(player, DataType.NICKNAME), nickname); // add to cache
-                    return nickname; // return nickname
-                } else {
-                    Cache.set(getIdentifier(player, DataType.NICKNAME), Optional.ofNullable(player.getName())); // update cache to the player's DisplayName
-                    return Optional.ofNullable(player.getName()); // return the player's DisplayName
-                }
-            }
-
-            // if nickname does exist in cache
-            else {
-                return cache.get(); // return nickname
-            }
         });
     }
 
-    public BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname) {
+    @Override
+    public BukkitFuture<Void> setNickname(UUID uuid, String nickname) {
         return new BukkitFuture<>(() -> {
 
-            String uuid = player.getUniqueId().toString();
+            setProperty(uuid, PROPERTY_NICKNAME, nickname);
 
-            // if nickname = username, remove nickname
-            if (nickname.equals(player.getName())) {
-                Cache.remove(getIdentifier(player, DataType.NICKNAME));
-                this.db.prepareStatement("UPDATE module_nickname SET nickname=NULL WHERE uuid=? AND nickname IS NOT NULL", uuid);
-            }
+            return null;
+        });
+    }
 
-            // update cache
-            Cache.set("nickname." + uuid, Optional.of(nickname));
+    @Override
+    public BukkitFuture<Void> removeNickname(UUID uuid) {
+        return new BukkitFuture<>(() -> {
 
-            // save to database
-            final PreparedStatement statement = this.db.prepareStatement("INSERT INTO module_nickname (uuid, nickname) VALUES (?, ?) ON DUPLICATE KEY UPDATE nickname=?", uuid, nickname, nickname);
-            statement.execute();
+            removeProperty(uuid, PROPERTY_NICKNAME);
 
-            return true;
+            return null;
         });
     }
 
@@ -86,58 +58,41 @@ public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler imple
     public BukkitFuture<Boolean> nicknameExists(String nickname) {
         return new BukkitFuture<>(() -> {
 
-            boolean nicknameExists = false;
+            for (UUID uuid : getUuids()) {
 
-            // get from database at nickname
-            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname WHERE nickname=?", nickname);
-            final ResultSet result = statement.executeQuery();
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-            // if exists in database
-            if (result.next()) {
-                nicknameExists = true;
+                if (storedNickname.isPresent()) {
+                    if (Colors.stripColors(storedNickname.get()).equals(Colors.stripColors(nickname))) {
+                        return true;
+                    }
+                }
             }
-
-            return nicknameExists;
-        });
-    }
-
-    public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
-        return new BukkitFuture<>(() -> {
-
-
-            // get uuid's that use @nickname
-            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname WHERE nickname=?", nickname);
-            final ResultSet result = statement.executeQuery();
-
-            Set<OfflinePlayer> players = new HashSet<>();
-
-            // add all players to set
-            while (result.next()) {
-                players.add(Bukkit.getOfflinePlayer(UUID.fromString(result.getString(0))));
-            }
-
-            // return set
-            return players;
+            return false;
         });
     }
 
     @Override
-    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
+    public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
         return new BukkitFuture<>(() -> {
 
-            HashMap<String, String> nicknames = new HashMap<>();
+            Set<OfflinePlayer> players = new HashSet<>();
 
-            final PreparedStatement statement = this.db.prepareStatement("SELECT FROM module_nickname");
-            final ResultSet result = statement.executeQuery();
+            for (UUID uuid : getUuids()) {
 
-            while (result.next()) {
-                String uuidString = result.getString(0);;
-                String nickname = result.getString(1);;
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-                nicknames.put(uuidString, nickname);
+                if (storedNickname.isPresent() && storedNickname.equals(nickname)) {
+                    players.add(Bukkit.getOfflinePlayer(uuid));
+                }
             }
-
-            return nicknames;
+            return players;
         });
+    }
+
+    // TODO
+    @Override
+    public BukkitFuture<Set<String>> getStoredNicknames() {
+        return null;
     }
 }

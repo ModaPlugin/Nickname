@@ -1,104 +1,112 @@
 package moda.plugin.module.nickname.storage;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import moda.plugin.moda.modules.Module;
-import moda.plugin.moda.utils.BukkitFuture;
-import moda.plugin.moda.utils.storage.JsonStorageHandler;
-import moda.plugin.moda.utils.storage.ModuleStorageHandler;
+import moda.plugin.moda.module.Module;
+import moda.plugin.moda.module.storage.ModuleStorageHandler;
+import moda.plugin.moda.module.storage.YamlStorageHandler;
+import moda.plugin.moda.util.BukkitFuture;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import xyz.derkades.derkutils.caching.Cache;
+import xyz.derkades.derkutils.bukkit.Colors;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class NicknameFileStorageHandler extends JsonStorageHandler implements NicknameStorageHandler {
+public class NicknameFileStorageHandler extends YamlStorageHandler implements NicknameStorageHandler {
+
+    private static final String PROPERTY_NICKNAME = "nickname";
 
     public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) throws IOException {
         super(module);
     }
 
-    public BukkitFuture<Optional<String>> getNickname(OfflinePlayer player) {
+    public BukkitFuture<Optional<String>> getNickname(UUID uuid) {
         return new BukkitFuture<>(() -> {
 
-            String uuid = player.getUniqueId().toString();
             Optional<String> nickname;
 
-            // get nickname from cache
-            Optional<Optional<String>> cache = Cache.get("nickname." + player.getUniqueId());
+            nickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-            // if nickname doesn't exist in cache
-            if (!cache.isPresent()) {
-
-                // if player exists in json
-                if (getJson().has(uuid)) {
-                    JsonObject playerData = getJson().get(uuid).getAsJsonObject();
-
-                    // if player has nickname
-                    if (playerData.has("nickname")) {
-                        nickname = Optional.of(playerData.get("nickname").getAsString());
-                        Cache.set("nickname." + player.getUniqueId(), nickname);
-                        return nickname;
-                    }
-                }
-
-                nickname = Optional.empty();
-
-                // add nickname to cache
-                Cache.set("nickname." + player.getUniqueId(), nickname);
-                return nickname;
-            }
-
-            nickname = cache.get();
             return nickname;
+
         });
     }
 
-    @Override
-    public BukkitFuture<Boolean> setNickname(OfflinePlayer player, String nickname) {
+    public BukkitFuture<Void> setNickname(UUID uuid, String nickname) {
         return new BukkitFuture<>(() -> {
 
-            String uuid = player.getUniqueId().toString();
+            setProperty(uuid, PROPERTY_NICKNAME, nickname);
 
-            // if nickname = username, remove nickname
-            if (nickname.equals(player.getName())) {
-                Cache.remove(uuid + ".nickname");
+            return null;
+        });
+    }
+
+    public BukkitFuture<Void> removeNickname(UUID uuid) {
+        return new BukkitFuture<>(() -> {
+
+            removeProperty(uuid, PROPERTY_NICKNAME);
+
+            return null;
+        });
+    }
+
+    public BukkitFuture<Boolean> nicknameExists(String nickname) {
+        return new BukkitFuture<>(() -> {
+
+            for (UUID uuid : getUuids()) {
+
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
+
+                if (storedNickname.isPresent()) {
+                    if (Colors.stripColors(storedNickname.get()).equalsIgnoreCase(Colors.stripColors(nickname))) {
+                        return true;
+                    }
+                }
             }
-
-            // update cache
-
-
             return false;
         });
     }
 
-    @Override
-    public BukkitFuture<Boolean> nicknameExists(String nickname) {
-        return null;
-    }
-
-    @Override
     public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public BukkitFuture<HashMap<String, String>> getAllPlayerData() {
-
         return new BukkitFuture<>(() -> {
+            String finalNickname = Colors.stripColors(nickname);
 
-            HashMap<String, String> playerdata = new HashMap<>();
+            Set<OfflinePlayer> players = new HashSet<>();
 
-            JsonObject obj = getJson().getAsJsonObject();
-            Set<Map.Entry<String, JsonElement>> players = obj.entrySet();
+            for (UUID uuid : getUuids()) {
 
-            for (Map.Entry<String, JsonElement> player : players) {
-                playerdata.put(player.toString(), player.getValue().getAsJsonObject().get("nickname").getAsString());
+                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
+
+                if (opt.isPresent()) {
+                    String storedNickname = Colors.stripColors(opt.get());
+                    if (storedNickname.equalsIgnoreCase(finalNickname)) {
+                        players.add(Bukkit.getOfflinePlayer(uuid));
+                    }
+                }
             }
 
-            return playerdata;
+            for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                if (player.getName().equalsIgnoreCase(finalNickname)) {
+                    players.add(player);
+                }
+            }
+
+            return players;
+        });
+    }
+
+    @Override
+    public BukkitFuture<Set<String>> getStoredNicknames() {
+        return new BukkitFuture<>(() -> {
+
+            List<UUID> uuids = new ArrayList<>(getUuids());
+
+            Set<String> nicknames = uuids.stream().map(uuid -> {
+                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
+                return opt.orElse("");
+            }).collect(Collectors.toSet());
+
+            return nicknames;
         });
     }
 }
