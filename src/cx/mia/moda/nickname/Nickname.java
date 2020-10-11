@@ -1,14 +1,14 @@
-package moda.plugin.module.nickname;
+package cx.mia.moda.nickname;
 
+import cx.mia.moda.nickname.storage.NicknameDatabaseStorageHandler;
+import cx.mia.moda.nickname.storage.NicknameStorageHandler;
 import moda.plugin.moda.module.IMessage;
 import moda.plugin.moda.module.Module;
 import moda.plugin.moda.module.command.ModuleCommandBuilder;
 import moda.plugin.moda.module.storage.DatabaseStorageHandler;
 import moda.plugin.moda.module.storage.FileStorageHandler;
 import moda.plugin.moda.placeholder.ModaPlaceholderAPI;
-import moda.plugin.module.nickname.storage.NicknameDatabaseStorageHandler;
-import moda.plugin.module.nickname.storage.NicknameFileStorageHandler;
-import moda.plugin.module.nickname.storage.NicknameStorageHandler;
+import cx.mia.moda.nickname.storage.NicknameFileStorageHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import xyz.derkades.derkutils.bukkit.Colors;
@@ -46,8 +46,8 @@ public class Nickname extends Module<NicknameStorageHandler> {
 
         instance = this;
 
-        if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > 128) {
-            throw new InvalidConfigurationException("Maximum nickname length cannot exceed 128 characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
+        if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > NICKNAME_MAX_LENGTH) {
+            throw new InvalidConfigurationException("Maximum nickname length cannot exceed " + NICKNAME_MAX_LENGTH + " characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }
         ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
             String nickname;

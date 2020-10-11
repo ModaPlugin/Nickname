@@ -1,1 +1,1 @@
-main: 'moda.plugin.module.nickname.Nickname'
+main: ${project.groupId}.${project.artifactId}.${project.name}

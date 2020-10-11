@@ -1,4 +1,4 @@
-package moda.plugin.module.nickname.storage;
+package cx.mia.moda.nickname.storage;
 
 public enum DataType {
     NICKNAME("nickname");

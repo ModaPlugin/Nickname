@@ -1,7 +1,7 @@
-package moda.plugin.module.nickname.utils;
+package cx.mia.moda.nickname.utils;
 
-import moda.plugin.module.nickname.Nickname;
-import moda.plugin.module.nickname.NicknameMessage;
+import cx.mia.moda.nickname.Nickname;
+import cx.mia.moda.nickname.NicknameMessage;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 

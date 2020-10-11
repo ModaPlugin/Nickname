@@ -1,18 +1,17 @@
-package moda.plugin.module.nickname;
+package cx.mia.moda.nickname;
 
+import cx.mia.moda.nickname.storage.NicknameStorageHandler;
+import cx.mia.moda.nickname.utils.Colors;
 import moda.plugin.moda.module.LangFile;
 import moda.plugin.moda.module.command.ModuleCommandExecutor;
 import moda.plugin.moda.util.BukkitFuture;
 import moda.plugin.moda.util.UuidFetcher;
-import moda.plugin.module.nickname.storage.NicknameStorageHandler;
-import moda.plugin.module.nickname.utils.Colors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 

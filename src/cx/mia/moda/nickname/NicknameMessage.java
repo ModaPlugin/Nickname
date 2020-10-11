@@ -1,4 +1,4 @@
-package moda.plugin.module.nickname;
+package cx.mia.moda.nickname;
 
 import moda.plugin.moda.module.IMessage;
 

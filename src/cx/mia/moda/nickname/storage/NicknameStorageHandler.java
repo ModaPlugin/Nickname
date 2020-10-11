@@ -1,4 +1,4 @@
-package moda.plugin.module.nickname.storage;
+package cx.mia.moda.nickname.storage;
 
 import moda.plugin.moda.module.storage.ModuleStorageHandler;
 import moda.plugin.moda.util.BukkitFuture;
