@@ -1,7 +1,7 @@
-package cx.mia.moda.nickname.storage;
+package cx.moda.module.nickname.storage;
 
-import moda.plugin.moda.module.storage.ModuleStorageHandler;
-import moda.plugin.moda.util.BukkitFuture;
+import cx.moda.moda.module.storage.ModuleStorageHandler;
+import cx.moda.moda.util.BukkitFuture;
 import org.bukkit.OfflinePlayer;
 
 import java.util.Optional;

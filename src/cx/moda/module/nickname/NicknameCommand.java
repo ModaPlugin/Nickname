@@ -1,11 +1,11 @@
-package cx.mia.moda.nickname;
+package cx.moda.module.nickname;
 
-import cx.mia.moda.nickname.storage.NicknameStorageHandler;
-import cx.mia.moda.nickname.utils.Colors;
-import moda.plugin.moda.module.LangFile;
-import moda.plugin.moda.module.command.ModuleCommandExecutor;
-import moda.plugin.moda.util.BukkitFuture;
-import moda.plugin.moda.util.UuidFetcher;
+import cx.moda.moda.module.LangFile;
+import cx.moda.moda.module.command.ModuleCommandExecutor;
+import cx.moda.moda.util.BukkitFuture;
+import cx.moda.moda.util.UuidFetcher;
+import cx.moda.module.nickname.storage.NicknameStorageHandler;
+import cx.moda.module.nickname.utils.Colors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

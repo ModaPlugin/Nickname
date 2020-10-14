@@ -1,23 +1,28 @@
-package cx.mia.moda.nickname.storage;
+package cx.moda.module.nickname.storage;
 
-import moda.plugin.moda.module.Module;
-import moda.plugin.moda.module.storage.ModuleStorageHandler;
-import moda.plugin.moda.module.storage.YamlStorageHandler;
-import moda.plugin.moda.util.BukkitFuture;
+import cx.moda.moda.module.storage.DatabaseStorageHandler;
+import cx.moda.moda.util.BukkitFuture;
+import cx.moda.module.nickname.Nickname;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import xyz.derkades.derkutils.bukkit.Colors;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-public class NicknameFileStorageHandler extends YamlStorageHandler implements NicknameStorageHandler {
+public class NicknameDatabaseStorageHandler extends DatabaseStorageHandler implements NicknameStorageHandler {
 
     private static final String PROPERTY_NICKNAME = "nickname";
 
-    public NicknameFileStorageHandler(Module<? extends ModuleStorageHandler> module) throws IOException {
+    public NicknameDatabaseStorageHandler(Module<?> module) {
         super(module);
+    }
+
+    public void setup() throws SQLException {
+        createTableIfNonexistent("module_nickname", "CREATE TABLE `module_nickname` (`uuid` VARCHAR(100) NOT NULL, `nickname` VARCHAR(" + Nickname.NICKNAME_MAX_LENGTH + ") NOT NULL, PRIMARY KEY (`uuid`)) ENGINE = InnoDB");
     }
 
     public BukkitFuture<Optional<String>> getNickname(UUID uuid) {
@@ -32,6 +37,7 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
+    @Override
     public BukkitFuture<Void> setNickname(UUID uuid, String nickname) {
         return new BukkitFuture<>(() -> {
 
@@ -41,6 +47,7 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
+    @Override
     public BukkitFuture<Void> removeNickname(UUID uuid) {
         return new BukkitFuture<>(() -> {
 
@@ -50,6 +57,7 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
+    @Override
     public BukkitFuture<Boolean> nicknameExists(String nickname) {
         return new BukkitFuture<>(() -> {
 
@@ -58,7 +66,7 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
                 Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
 
                 if (storedNickname.isPresent()) {
-                    if (Colors.stripColors(storedNickname.get()).equalsIgnoreCase(Colors.stripColors(nickname))) {
+                    if (Colors.stripColors(storedNickname.get()).equals(Colors.stripColors(nickname))) {
                         return true;
                     }
                 }
@@ -67,46 +75,27 @@ public class NicknameFileStorageHandler extends YamlStorageHandler implements Ni
         });
     }
 
+    @Override
     public BukkitFuture<Set<OfflinePlayer>> getPlayersByNickname(String nickname) {
         return new BukkitFuture<>(() -> {
-            String finalNickname = Colors.stripColors(nickname);
 
             Set<OfflinePlayer> players = new HashSet<>();
 
             for (UUID uuid : getUuids()) {
 
-                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
+                Optional<String> storedNickname = getProperty(uuid, PROPERTY_NICKNAME);
 
-                if (opt.isPresent()) {
-                    String storedNickname = Colors.stripColors(opt.get());
-                    if (storedNickname.equalsIgnoreCase(finalNickname)) {
-                        players.add(Bukkit.getOfflinePlayer(uuid));
-                    }
+                if (storedNickname.isPresent() && storedNickname.equals(nickname)) {
+                    players.add(Bukkit.getOfflinePlayer(uuid));
                 }
             }
-
-            for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-                if (player.getName().equalsIgnoreCase(finalNickname)) {
-                    players.add(player);
-                }
-            }
-
             return players;
         });
     }
 
+    // TODO
     @Override
     public BukkitFuture<Set<String>> getStoredNicknames() {
-        return new BukkitFuture<>(() -> {
-
-            List<UUID> uuids = new ArrayList<>(getUuids());
-
-            Set<String> nicknames = uuids.stream().map(uuid -> {
-                Optional<String> opt = getProperty(uuid, PROPERTY_NICKNAME);
-                return opt.orElse("");
-            }).collect(Collectors.toSet());
-
-            return nicknames;
-        });
+        return null;
     }
 }

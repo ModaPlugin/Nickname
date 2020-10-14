@@ -1,8 +1,8 @@
-package cx.mia.moda.nickname;
-
-import moda.plugin.moda.module.IMessage;
+package cx.moda.module.nickname;
 
 // import java.util.logging.Level;
+
+import cx.moda.moda.module.IMessage;
 
 public enum NicknameMessage implements IMessage {
     UPDATE_NOTIFY(

@@ -1,14 +1,15 @@
-package cx.mia.moda.nickname;
+package cx.moda.module.nickname;
 
-import cx.mia.moda.nickname.storage.NicknameDatabaseStorageHandler;
-import cx.mia.moda.nickname.storage.NicknameStorageHandler;
-import moda.plugin.moda.module.IMessage;
-import moda.plugin.moda.module.Module;
-import moda.plugin.moda.module.command.ModuleCommandBuilder;
-import moda.plugin.moda.module.storage.DatabaseStorageHandler;
-import moda.plugin.moda.module.storage.FileStorageHandler;
-import moda.plugin.moda.placeholder.ModaPlaceholderAPI;
-import cx.mia.moda.nickname.storage.NicknameFileStorageHandler;
+import cx.moda.moda.module.IMessage;
+import cx.moda.moda.module.Module;
+import cx.moda.moda.module.command.ModuleCommandBuilder;
+import cx.moda.moda.module.storage.DatabaseStorageHandler;
+import cx.moda.moda.module.storage.FileStorageHandler;
+import cx.moda.moda.placeholder.ModaPlaceholderAPI;
+import cx.moda.moda.placeholder.ModaPlayerPlaceholder;
+import cx.moda.module.nickname.storage.NicknameDatabaseStorageHandler;
+import cx.moda.module.nickname.storage.NicknameFileStorageHandler;
+import cx.moda.module.nickname.storage.NicknameStorageHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import xyz.derkades.derkutils.bukkit.Colors;
@@ -49,7 +50,7 @@ public class Nickname extends Module<NicknameStorageHandler> {
         if (getConfig().getInt("max-length", NICKNAME_MAX_LENGTH) > NICKNAME_MAX_LENGTH) {
             throw new InvalidConfigurationException("Maximum nickname length cannot exceed " + NICKNAME_MAX_LENGTH + " characters. " + getConfig().getInt("nickname.max-length") + " > " + NICKNAME_MAX_LENGTH);
         }
-        ModaPlaceholderAPI.addPlaceholder("NICKNAME", player -> {
+        ModaPlaceholderAPI.registerPlaceholder(new ModaPlayerPlaceholder("NICKNAME", player -> {
             String nickname;
 
             // TODO async papi handling
@@ -67,7 +68,7 @@ public class Nickname extends Module<NicknameStorageHandler> {
             }
 
             return nickname + ChatColor.RESET;
-        });
+        }));
         this.registerCommand(
                 new ModuleCommandBuilder("nickname")
                         .withExecutor(new NicknameCommand(this))

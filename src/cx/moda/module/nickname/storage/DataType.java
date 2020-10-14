@@ -1,4 +1,4 @@
-package cx.mia.moda.nickname.storage;
+package cx.moda.module.nickname.storage;
 
 public enum DataType {
     NICKNAME("nickname");
