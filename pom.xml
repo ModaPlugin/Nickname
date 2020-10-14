@@ -5,8 +5,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cx.mia.moda</groupId>
-    <artifactId>nickname</artifactId>
+    <groupId>cx.moda.module</groupId>
+    <artifactId>Nickname</artifactId>
 
     <name>Nickname</name>
     <version>canary</version>
