@@ -3,6 +3,7 @@ package cx.moda.module.nickname.storage;
 import cx.moda.moda.module.storage.DatabaseStorageHandler;
 import cx.moda.moda.util.BukkitFuture;
 import cx.moda.module.nickname.Nickname;
+import cx.moda.moda.module.Module;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import xyz.derkades.derkutils.bukkit.Colors;
